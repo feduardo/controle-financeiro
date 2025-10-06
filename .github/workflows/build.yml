@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -23,13 +24,33 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Install dependencies
+    - name: Create package.json if not exists
       run: |
-        npm install @capacitor/core @capacitor/cli @capacitor/android
+        if [ ! -f package.json ]; then
+          npm init -y
+        fi
+    
+    - name: Install Capacitor
+      run: |
+        npm install --save @capacitor/core @capacitor/cli @capacitor/android
+    
+    - name: Check if capacitor.config.json exists
+      run: |
+        if [ ! -f capacitor.config.json ]; then
+          npx cap init "Controle Financeiro" "com.financeiro.app" --web-dir=.
+        fi
+    
+    - name: Add Android platform if not exists
+      run: |
+        if [ ! -d android ]; then
+          npx cap add android
+        fi
+    
+    - name: Copy web assets
+      run: npx cap copy android
     
     - name: Sync Capacitor
-      run: |
-        npx cap sync
+      run: npx cap sync android
     
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
@@ -37,10 +58,11 @@ jobs:
     - name: Build APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon
+        ./gradlew assembleDebug --no-daemon --stacktrace
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug
+        name: app-debug-apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: error
