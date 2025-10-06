@@ -24,13 +24,11 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Verify index.html exists
+    - name: Create www directory and copy index.html
       run: |
-        if [ ! -f index.html ]; then
-          echo "ERROR: index.html not found!"
-          exit 1
-        fi
-        echo "✓ index.html found"
+        mkdir -p www
+        cp index.html www/
+        echo "Web files prepared in www/"
     
     - name: Create package.json
       run: |
@@ -38,7 +36,6 @@ jobs:
         {
           "name": "controle-financeiro",
           "version": "1.0.0",
-          "description": "Sistema de Controle Financeiro",
           "dependencies": {
             "@capacitor/android": "^6.1.2",
             "@capacitor/cli": "^6.1.2",
@@ -56,31 +53,23 @@ jobs:
         {
           "appId": "com.financeiro.app",
           "appName": "Controle Financeiro",
-          "webDir": ".",
-          "bundledWebRuntime": false
+          "webDir": "www"
         }
         EOF
     
-    - name: Initialize Android platform
+    - name: Add Android platform
       run: npx cap add android
     
-    - name: Copy web assets to Android
-      run: npx cap copy android
-    
-    - name: Update Android project
-      run: npx cap update android
-    
-    - name: Grant execute permission for gradlew
+    - name: Grant execute permission
       run: chmod +x android/gradlew
     
     - name: Build APK
       run: |
         cd android
-        ./gradlew assembleDebug --no-daemon --stacktrace
+        ./gradlew assembleDebug --no-daemon
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: controle-financeiro-debug
+        name: app-debug
         path: android/app/build/outputs/apk/debug/app-debug.apk
-        if-no-files-found: error
