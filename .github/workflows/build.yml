@@ -24,45 +24,76 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Create package.json if not exists
+    - name: Verify index.html exists
       run: |
-        if [ ! -f package.json ]; then
-          npm init -y
+        if [ ! -f index.html ]; then
+          echo "ERROR: index.html not found!"
+          exit 1
         fi
+        echo "✓ index.html found"
     
-    - name: Install Capacitor
-      run: |
-        npm install --save @capacitor/core @capacitor/cli @capacitor/android
+    - name: Install Capacitor globally
+      run: npm install -g @capacitor/cli
     
-    - name: Check if capacitor.config.json exists
+    - name: Create package.json
       run: |
-        if [ ! -f capacitor.config.json ]; then
-          npx cap init "Controle Financeiro" "com.financeiro.app" --web-dir=.
-        fi
+        cat > package.json << 'EOF'
+        {
+          "name": "controle-financeiro",
+          "version": "1.0.0",
+          "description": "Sistema de Controle Financeiro",
+          "dependencies": {
+            "@capacitor/android": "^6.1.2",
+            "@capacitor/cli": "^6.1.2",
+            "@capacitor/core": "^6.1.2"
+          }
+        }
+        EOF
     
-    - name: Add Android platform if not exists
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Create capacitor.config.json
       run: |
-        if [ ! -d android ]; then
+        cat > capacitor.config.json << 'EOF'
+        {
+          "appId": "com.financeiro.app",
+          "appName": "Controle Financeiro",
+          "webDir": ".",
+          "bundledWebRuntime": false
+        }
+        EOF
+    
+    - name: Initialize Capacitor (if needed)
+      run: |
+        if [ ! -d "android" ]; then
+          echo "Initializing Capacitor..."
           npx cap add android
+        else
+          echo "✓ Android platform already exists"
         fi
     
-    - name: Copy web assets
-      run: npx cap copy android
-    
-    - name: Sync Capacitor
-      run: npx cap sync android
+    - name: Update capacitor.config.ts in android
+      run: |
+        echo "Updating Android configuration..."
+        npx cap sync android --no-build
     
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
     
-    - name: Build APK
+    - name: Build APK Debug
       run: |
         cd android
         ./gradlew assembleDebug --no-daemon --stacktrace
     
+    - name: List generated files
+      run: |
+        echo "Looking for APK files..."
+        find android/app/build/outputs -name "*.apk" -type f
+    
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: controle-financeiro-debug
+        path: android/app/build/outputs/apk/debug/*.apk
         if-no-files-found: error
