@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .screen {
+            display: none;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .summary-item {
+            margin: 15px 0;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .contracts { color: #4CAF50; }
+        .expenses { color: #f44336; }
+        .profit { color: #2196F3; }
+
+        .big-btn {
+            width: 100%;
+            padding: 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-contract {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-expense {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .btn-reports {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-list {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+        }
+
+        .big-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .calculated-field {
+            background: #f5f5f5;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            max-width: 100%;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+            flex: 1;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+
+        .nav-btn.active {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .nav-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .list-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .list-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #4CAF50;
+        }
+
+        .list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .list-item-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .list-item-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .list-item-details {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #1976D2;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .city-report {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .city-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .city-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .expense-breakdown {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .expense-breakdown-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 14px;
+        }
+
+        .recommendation {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .rec-green {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .rec-yellow {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .rec-red {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal-message {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .modal-btn-confirm {
+            background: #f44336;
+            color: white;
+        }
+
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tela Inicial -->
+        <div id="home" class="screen active">
+            <div class="header">
+                <h1>💰 Controle Financeiro Pro</h1>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-item">
+                    <div class="summary-label">Total de Contratos</div>
+                    <div class="summary-value contracts" id="totalContracts">R$ 0,00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total de Gastos</div>
+                    <div class="summary-value expenses" id="totalExpenses">R$ 0,00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Lucro Líquido</div>
+                    <div class="summary-value profit" id="netProfit">R$ 0,00</div>
+                </div>
+            </div>
+
+            <button class="big-btn btn-contract" onclick="showAddContract()">
+                📝 Adicionar Contrato
+            </button>
+            
+            <button class="big-btn btn-expense" onclick="showAddExpense()">
+                💸 Adicionar Gasto
+            </button>
+            
+            <button class="big-btn btn-list" onclick="showScreen('listContracts')">
+                📋 Gerenciar Contratos
+            </button>
+
+            <button class="big-btn btn-list" onclick="showScreen('listExpenses')">
+                📋 Gerenciar Gastos
+            </button>
+            
+            <button class="big-btn btn-reports" onclick="showScreen('reports')">
+                📊 Relatórios por Cidade
+            </button>
+        </div>
+
+        <!-- Tela Adicionar/Editar Contrato -->
+        <div id="addContract" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">← Voltar</button>
+                <h1 id="contractFormTitle">📝 Novo Contrato</h1>
+            </div>
+
+            <div id="contractSuccess" class="success-message" style="display: none;">
+                Contrato salvo com sucesso! 🎉
+            </div>
+
+            <form id="contractForm" onsubmit="saveContract(event)">
+                <input type="hidden" id="contractId">
+
+                <div class="form-group">
+                    <label class="form-label">Cidade *</label>
+                    <input type="text" class="form-input" id="contractCity" placeholder="Ex: São Paulo" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Valor Total do Contrato *</label>
+                    <input type="number" class="form-input" id="contractValue" placeholder="0,00" step="0.01" required oninput="calculateContractProfit()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Comissão Paga (se houver)</label>
+                    <input type="number" class="form-input" id="contractCommission" placeholder="0,00" step="0.01" value="0" oninput="calculateContractProfit()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lucro Líquido</label>
+                    <input type="text" class="form-input calculated-field" id="contractNetProfit" readonly placeholder="R$ 0,00">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Data *</label>
+                    <input type="date" class="form-input" id="contractDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observação</label>
+                    <input type="text" class="form-input" id="contractNote" placeholder="Detalhes do contrato...">
+                </div>
+
+                <button type="submit" class="submit-btn">💾 Salvar Contrato</button>
+            </form>
+        </div>
+
+        <!-- Tela Adicionar/Editar Gasto -->
+        <div id="addExpense" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">← Voltar</button>
+                <h1 id="expenseFormTitle">💸 Novo Gasto</h1>
+            </div>
+
+            <div id="expenseSuccess" class="success-message" style="display: none;">
+                Gasto salvo com sucesso! 🎉
+            </div>
+
+            <form id="expenseForm" onsubmit="saveExpense(event)">
+                <input type="hidden" id="expenseId">
+
+                <div class="form-group">
+                    <label class="form-label">Contrato Relacionado (opcional)</label>
+                    <select class="form-select" id="expenseContract" onchange="updateExpenseCity()">
+                        <option value="">Nenhum contrato específico</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Cidade *</label>
+                    <input type="text" class="form-input" id="expenseCity" placeholder="Ex: São Paulo" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Categoria *</label>
+                    <select class="form-select" id="expenseCategory" required>
+                        <option value="">Selecione uma categoria</option>
+                        <option value="Gasolina">⛽ Gasolina</option>
+                        <option value="Hospedagem">🏨 Hospedagem</option>
+                        <option value="Alimentação">🍽️ Alimentação</option>
+                        <option value="Transporte">🚗 Transporte</option>
+                        <option value="Material">📦 Material</option>
+                        <option value="Equipamento">🔧 Equipamento</option>
+                        <option value="Outros">📋 Outros</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Valor *</label>
+                    <input type="number" class="form-input" id="expenseValue" placeholder="0,00" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Data *</label>
+                    <input type="date" class="form-input" id="expenseDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observação</label>
+                    <input type="text" class="form-input" id="expenseNote" placeholder="Detalhes do gasto...">
+                </div>
+
+                <button type="submit" class="submit-btn">💾 Salvar Gasto</button>
+            </form>
+        </div>
+
+        <!-- Tela Listar Contratos -->
+        <div id="listContracts" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">← Voltar</button>
+                <h1>📋 Meus Contratos</h1>
+            </div>
+
+            <div class="filter-section">
+                <label class="filter-label">Filtrar por Cidade</label>
+                <select class="form-select" id="filterContractCity" onchange="renderContracts()">
+                    <option value="">Todas as cidades</option>
+                </select>
+            </div>
+
+            <div id="contractsList"></div>
+        </div>
+
+        <!-- Tela Listar Gastos -->
+        <div id="listExpenses" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">← Voltar</button>
+                <h1>📋 Meus Gastos</h1>
+            </div>
+
+            <div class="filter-section">
+                <label class="filter-label">Filtrar por Cidade</label>
+                <select class="form-select" id="filterExpenseCity" onchange="renderExpenses()">
+                    <option value="">Todas as cidades</option>
+                </select>
+            </div>
+
+            <div id="expensesList"></div>
+        </div>
+
+        <!-- Tela Relatórios -->
+        <div id="reports" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('home')">← Voltar</button>
+                <h1>📊 Relatórios por Cidade</h1>
+            </div>
+
+            <div id="cityReports"></div>
+        </div>
+
+        <!-- Navegação Inferior -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="showScreen('home')">
+                🏠<br><small>Início</small>
+            </button>
+            <button class="nav-btn" onclick="showScreen('listContracts')">
+                📝<br><small>Contratos</small>
+            </button>
+            <button class="nav-btn" onclick="showScreen('listExpenses')">
+                💸<br><small>Gastos</small>
+            </button>
+            <button class="nav-btn" onclick="showScreen('reports')">
+                📊<br><small>Relatórios</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Confirmar Exclusão</div>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados armazenados localmente
+        let contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
+        let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+        let deleteCallback = null;
+
+        // Funções de navegação
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            document.getElementById(screenId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const navButtons = document.querySelectorAll('.nav-btn');
+            if (screenId === 'home') navButtons[0].classList.add('active');
+            else if (screenId === 'listContracts') navButtons[1].classList.add('active');
+            else if (screenId === 'listExpenses') navButtons[2].classList.add('active');
+            else if (screenId === 'reports') navButtons[3].classList.add('active');
+            
+            if (screenId === 'home') updateSummary();
+            if (screenId === 'listContracts') {
+                updateCityFilters();
+                renderContracts();
+            }
+            if (screenId === 'listExpenses') {
+                updateCityFilters();
+                renderExpenses();
+            }
+            if (screenId === 'reports') updateReports();
+        }
+
+        function showAddContract() {
+            document.getElementById('contractFormTitle').textContent = '📝 Novo Contrato';
+            document.getElementById('contractForm').reset();
+            document.getElementById('contractId').value = '';
+            document.getElementById('contractNetProfit').value = '';
+            setDefaultDate('contractDate');
+            showScreen('addContract');
+        }
+
+        function showAddExpense() {
+            document.getElementById('expenseFormTitle').textContent = '💸 Novo Gasto';
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expenseId').value = '';
+            updateContractSelect();
+            setDefaultDate('expenseDate');
+            showScreen('addExpense');
+        }
+
+        function setDefaultDate(elementId) {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById(elementId).value = today;
+        }
+
+        // Funções de Contratos
+        function calculateContractProfit() {
+            const value = parseFloat(document.getElementById('contractValue').value) || 0;
+            const commission = parseFloat(document.getElementById('contractCommission').value) || 0;
+            const netProfit = value - commission;
+            
+            document.getElementById('contractNetProfit').value = `R$ ${netProfit.toFixed(2).replace('.', ',')}`;
+        }
+
+        function saveContract(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('contractId').value;
+            const contract = {
+                id: id ? parseInt(id) : Date.now(),
+                city: document.getElementById('contractCity').value.trim(),
+                value: parseFloat(document.getElementById('contractValue').value),
+                commission: parseFloat(document.getElementById('contractCommission').value) || 0,
+                netProfit: parseFloat(document.getElementById('contractValue').value) - (parseFloat(document.getElementById('contractCommission').value) || 0),
+                date: document.getElementById('contractDate').value,
+                note: document.getElementById('contractNote').value.trim()
+            };
+            
+            if (id) {
+                const index = contracts.findIndex(c => c.id === parseInt(id));
+                contracts[index] = contract;
+            } else {
+                contracts.push(contract);
+            }
+            
+            localStorage.setItem('contracts', JSON.stringify(contracts));
+            
+            showSuccess('contractSuccess');
+            document.getElementById('contractForm').reset();
+            document.getElementById('contractId').value = '';
+            document.getElementById('contractNetProfit').value = '';
+            
+            updateSummary();
+        }
+
+        function editContract(id) {
+            const contract = contracts.find(c => c.id === id);
+            if (!contract) return;
+            
+            document.getElementById('contractFormTitle').textContent = '✏️ Editar Contrato';
+            document.getElementById('contractId').value = contract.id;
+            document.getElementById('contractCity').value = contract.city;
+            document.getElementById('contractValue').value = contract.value;
+            document.getElementById('contractCommission').value = contract.commission;
+            document.getElementById('contractDate').value = contract.date;
+            document.getElementById('contractNote').value = contract.note;
+            
+            calculateContractProfit();
+            showScreen('addContract');
+        }
+
+        function deleteContract(id) {
+            const contract = contracts.find(c => c.id === id);
+            const linkedExpenses = expenses.filter(e => e.contractId === id);
+            
+            let message = `Tem certeza que deseja excluir o contrato de ${contract.city}?`;
+            if (linkedExpenses.length > 0) {
+                message += `\n\n⚠️ Este contrato possui ${linkedExpenses.length} gasto(s) vinculado(s).`;
+            }
+            
+            showDeleteModal(message, () => {
+                contracts = contracts.filter(c => c.id !== id);
+                localStorage.setItem('contracts', JSON.stringify(contracts));
+                renderContracts();
+                updateSummary();
+            });
+        }
+
+        function renderContracts() {
+            const filterCity = document.getElementById('filterContractCity').value;
+            const filtered = filterCity ? contracts.filter(c => c.city === filterCity) : contracts;
+            const sorted = filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const container = document.getElementById('contractsList');
+            
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <div>Nenhum contrato encontrado</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = sorted.map(contract => `
+                <div class="list-item">
+                    <div class="list-item-header">
+                        <div class="list-item-title">🏙️ ${contract.city}</div>
+                        <div class="list-item-value contracts">R$ ${contract.netProfit.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                    <div class="list-item-details">
+                        📅 ${new Date(contract.date).toLocaleDateString('pt-BR')}
+                    </div>
+                    <div class="list-item-details">
+                        💰 Valor: R$ ${contract.value.toFixed(2).replace('.', ',')} | 
+                        💳 Comissão: R$ ${contract.commission.toFixed(2).replace('.', ',')}
+                    </div>
+                    ${contract.note ? `<div class="list-item-details">📝 ${contract.note}</div>` : ''}
+                    <div class="list-item-actions">
+                        <button class="btn-edit" onclick="editContract(${contract.id})">✏️ Editar</button>
+                        <button class="btn-delete" onclick="deleteContract(${contract.id})">🗑️ Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Funções de Gastos
+        function updateContractSelect() {
+            const select = document.getElementById('expenseContract');
+            const sorted = contracts.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            select.innerHTML = '<option value="">Nenhum contrato específico</option>' +
+                sorted.map(c => `
+                    <option value="${c.id}">${c.city} - R$ ${c.value.toFixed(2)} (${new Date(c.date).toLocaleDateString('pt-BR')})</option>
+                `).join('');
+        }
+
+        function updateExpenseCity() {
+            const contractId = document.getElementById('expenseContract').value;
+            const cityInput = document.getElementById('expenseCity');
+            
+            if (contractId) {
+                const contract = contracts.find(c => c.id === parseInt(contractId));
+                if (contract) {
+                    cityInput.value = contract.city;
+                    cityInput.readOnly = true;
+                    cityInput.style.background = '#f5f5f5';
+                }
+            } else {
+                cityInput.readOnly = false;
+                cityInput.style.background = 'white';
+            }
+        }
+
+        function saveExpense(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('expenseId').value;
+            const contractId = document.getElementById('expenseContract').value;
+            
+            const expense = {
+                id: id ? parseInt(id) : Date.now(),
+                contractId: contractId ? parseInt(contractId) : null,
+                city: document.getElementById('expenseCity').value.trim(),
+                category: document.getElementById('expenseCategory').value,
+                value: parseFloat(document.getElementById('expenseValue').value),
+                date: document.getElementById('expenseDate').value,
+                note: document.getElementById('expenseNote').value.trim()
+            };
+            
+            if (id) {
+                const index = expenses.findIndex(e => e.id === parseInt(id));
+                expenses[index] = expense;
+            } else {
+                expenses.push(expense);
+            }
+            
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            
+            showSuccess('expenseSuccess');
+            document.getElementById('expenseForm').reset();
+            document.getElementById('expenseId').value = '';
+            updateContractSelect();
+            
+            updateSummary();
+        }
+
+        function editExpense(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+            
+            document.getElementById('expenseFormTitle').textContent = '✏️ Editar Gasto';
+            document.getElementById('expenseId').value = expense.id;
+            updateContractSelect();
+            document.getElementById('expenseContract').value = expense.contractId || '';
+            document.getElementById('expenseCity').value = expense.city;
+            document.getElementById('expenseCategory').value = expense.category;
+            document.getElementById('expenseValue').value = expense.value;
+            document.getElementById('expenseDate').value = expense.date;
+            document.getElementById('expenseNote').value = expense.note;
+            
+            updateExpenseCity();
+            showScreen('addExpense');
+        }
+
+        function deleteExpense(id) {
+            showDeleteModal('Tem certeza que deseja excluir este gasto?', () => {
+                expenses = expenses.filter(e => e.id !== id);
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                renderExpenses();
+                updateSummary();
+            });
+        }
+
+        function renderExpenses() {
+            const filterCity = document.getElementById('filterExpenseCity').value;
+            const filtered = filterCity ? expenses.filter(e => e.city === filterCity) : expenses;
+            const sorted = filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const container = document.getElementById('expensesList');
+            
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💸</div>
+                        <div>Nenhum gasto encontrado</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = sorted.map(expense => {
+                const contract = expense.contractId ? contracts.find(c => c.id === expense.contractId) : null;
+                return `
+                    <div class="list-item">
+                        <div class="list-item-header">
+                            <div class="list-item-title">${expense.category}</div>
+                            <div class="list-item-value expenses">R$ ${expense.value.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <div class="list-item-details">
+                            🏙️ ${expense.city} | 📅 ${new Date(expense.date).toLocaleDateString('pt-BR')}
+                        </div>
+                        ${contract ? `<div class="list-item-details">🔗 Vinculado ao contrato de ${contract.city}</div>` : ''}
+                        ${expense.note ? `<div class="list-item-details">📝 ${expense.note}</div>` : ''}
+                        <div class="list-item-actions">
+                            <button class="btn-edit" onclick="editExpense(${expense.id})">✏️ Editar</button>
+                            <button class="btn-delete" onclick="deleteExpense(${expense.id})">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Funções de Relatórios
+        function updateReports() {
+            const cityData = {};
+            
+            // Agrupar contratos por cidade
+            contracts.forEach(contract => {
+                if (!cityData[contract.city]) {
+                    cityData[contract.city] = {
+                        contracts: 0,
+                        expenses: 0,
+                        expensesByCategory: {}
+                    };
+                }
+                cityData[contract.city].contracts += contract.netProfit;
+            });
+            
+            // Agrupar gastos por cidade
+            const generalExpenses = [];
+            expenses.forEach(expense => {
+                const city = expense.city;
+                
+                if (cityData[city]) {
+                    cityData[city].expenses += expense.value;
+                    if (!cityData[city].expensesByCategory[expense.category]) {
+                        cityData[city].expensesByCategory[expense.category] = 0;
+                    }
+                    cityData[city].expensesByCategory[expense.category] += expense.value;
+                } else {
+                    generalExpenses.push(expense);
+                }
+            });
+            
+            const container = document.getElementById('cityReports');
+            
+            if (Object.keys(cityData).length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <div>Nenhum dado para gerar relatórios</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            // Relatórios por cidade
+            Object.entries(cityData).sort((a, b) => (b[1].contracts - b[1].expenses) - (a[1].contracts - a[1].expenses)).forEach(([city, data]) => {
+                const profit = data.contracts - data.expenses;
+                const margin = data.contracts > 0 ? (profit / data.contracts) * 100 : 0;
+                
+                let recClass = 'rec-green';
+                let recText = '✅ Lucro excelente! Mantenha este valor.';
+                
+                if (margin < 20) {
+                    recClass = 'rec-red';
+                    recText = '⚠️ Margem baixa! Considere aumentar o valor do contrato.';
+                } else if (margin < 40) {
+                    recClass = 'rec-yellow';
+                    recText = '⚡ Margem moderada. Há espaço para otimização.';
+                }
+                
+                html += `
+                    <div class="city-report">
+                        <div class="city-name">📍 ${city}</div>
+                        <div class="city-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Contratos</div>
+                                <div class="stat-value contracts">R$ ${data.contracts.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Gastos</div>
+                                <div class="stat-value expenses">R$ ${data.expenses.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Lucro Líquido</div>
+                                <div class="stat-value profit">R$ ${profit.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Margem</div>
+                                <div class="stat-value">${margin.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                `;
+                
+                if (Object.keys(data.expensesByCategory).length > 0) {
+                    html += `
+                        <div class="expense-breakdown">
+                            <div class="expense-breakdown-title">📊 Detalhamento de Gastos:</div>
+                    `;
+                    Object.entries(data.expensesByCategory).sort((a, b) => b[1] - a[1]).forEach(([category, value]) => {
+                        html += `
+                            <div class="expense-item">
+                                <span>${category}</span>
+                                <span>R$ ${value.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                html += `
+                    <div class="recommendation ${recClass}">
+                        ${recText}
+                    </div>
+                    </div>
+                `;
+            });
+            
+            // Gastos Gerais
+            if (generalExpenses.length > 0) {
+                const totalGeneral = generalExpenses.reduce((sum, e) => sum + e.value, 0);
+                const categoriesGeneral = {};
+                
+                generalExpenses.forEach(expense => {
+                    if (!categoriesGeneral[expense.category]) {
+                        categoriesGeneral[expense.category] = 0;
+                    }
+                    categoriesGeneral[expense.category] += expense.value;
+                });
+                
+                html += `
+                    <div class="report-card">
+                        <div class="report-title">📋 Gastos Gerais (sem cidade definida)</div>
+                        <div class="stat-item" style="margin-bottom: 15px;">
+                            <div class="stat-label">Total de Gastos Gerais</div>
+                            <div class="stat-value expenses">R$ ${totalGeneral.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <div class="expense-breakdown">
+                            <div class="expense-breakdown-title">📊 Por Categoria:</div>
+                `;
+                
+                Object.entries(categoriesGeneral).sort((a, b) => b[1] - a[1]).forEach(([category, value]) => {
+                    html += `
+                        <div class="expense-item">
+                            <span>${category}</span>
+                            <span>R$ ${value.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Funções auxiliares
+        function updateSummary() {
+            const totalContracts = contracts.reduce((sum, contract) => sum + contract.netProfit, 0);
+            const totalExpenses = expenses.reduce((sum, expense) => sum + expense.value, 0);
+            const netProfit = totalContracts - totalExpenses;
+            
+            document.getElementById('totalContracts').textContent = `R$ ${totalContracts.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalExpenses').textContent = `R$ ${totalExpenses.toFixed(2).replace('.', ',')}`;
+            document.getElementById('netProfit').textContent = `R$ ${netProfit.toFixed(2).replace('.', ',')}`;
+            
+            const profitElement = document.getElementById('netProfit');
+            if (netProfit > 0) {
+                profitElement.style.color = '#4CAF50';
+            } else if (netProfit < 0) {
+                profitElement.style.color = '#f44336';
+            } else {
+                profitElement.style.color = '#666';
+            }
+        }
+
+        function updateCityFilters() {
+            const cities = [...new Set([
+                ...contracts.map(c => c.city),
+                ...expenses.map(e => e.city)
+            ])].sort();
+            
+            const filterContract = document.getElementById('filterContractCity');
+            const filterExpense = document.getElementById('filterExpenseCity');
+            
+            const options = '<option value="">Todas as cidades</option>' +
+                cities.map(city => `<option value="${city}">${city}</option>`).join('');
+            
+            filterContract.innerHTML = options;
+            filterExpense.innerHTML = options;
+        }
+
+        function showSuccess(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        function showDeleteModal(message, callback) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('confirmModal').classList.add('active');
+            deleteCallback = callback;
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            deleteCallback = null;
+        }
+
+        function confirmDelete() {
+            if (deleteCallback) {
+                deleteCallback();
+                deleteCallback = null;
+            }
+            closeModal();
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSummary();
+            updateCityFilters();
+        });
+    </script>
+</body>
+</html>
